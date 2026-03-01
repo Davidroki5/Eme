@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emergency Alert System</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#111;
+  color:white;
+  text-align:center;
+}
+
+header{
+  background:red;
+  padding:20px;
+  font-size:28px;
+  font-weight:bold;
+  letter-spacing:2px;
+  animation: flash 1s infinite;
+}
+
+@keyframes flash{
+  0%{background:red;}
+  50%{background:darkred;}
+  100%{background:red;}
+}
+
+.container{
+  padding:40px 20px;
+}
+
+.alert-box{
+  background:#222;
+  border:3px solid red;
+  border-radius:10px;
+  padding:30px;
+  max-width:500px;
+  margin:20px auto;
+  box-shadow:0 0 20px red;
+}
+
+button{
+  background:red;
+  border:none;
+  padding:15px 30px;
+  color:white;
+  font-size:18px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:20px;
+}
+
+button:hover{
+  background:darkred;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+🚨 EMERGENCY ALERT 🚨
+</header>
+
+<div class="container">
+  <div class="alert-box">
+    <h2>System Warning</h2>
+    <p>This is a simulated emergency broadcast system.</p>
+    <p>Please remain calm and follow instructions.</p>
+    <button onclick="triggerAlert()">Activate Siren</button>
+  </div>
+</div>
+
+<script>
+function triggerAlert(){
+  alert("⚠️ EMERGENCY ACTIVATED ⚠️");
+}
+</script>
+
+</body>
+</html>
