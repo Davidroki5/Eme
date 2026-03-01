@@ -14,7 +14,7 @@ body{
   overflow:hidden;
 }
 
-/* Flashing background */
+/* Flash background */
 .flash{
   position:fixed;
   inset:0;
@@ -26,11 +26,11 @@ body{
 
 @keyframes flash{
   0%{opacity:0;}
-  50%{opacity:0.4;}
+  50%{opacity:0.35;}
   100%{opacity:0;}
 }
 
-/* Center warning */
+/* Center container */
 .center{
   position:absolute;
   top:50%;
@@ -39,26 +39,26 @@ body{
   text-align:center;
 }
 
+/* Glitch effect */
 h1{
   font-size:60px;
   letter-spacing:8px;
   color:#ff1a1a;
   text-shadow:0 0 20px red, 0 0 40px red;
-  animation:glitch 0.3s infinite alternate;
+  animation:glitch 0.15s infinite alternate;
 }
 
 @keyframes glitch{
-  from{transform:translate(-50%,-50%) skewX(0deg);}
-  to{transform:translate(-50%,-50%) skewX(2deg);}
+  from{ transform:translate(-2px, -50%); }
+  to{ transform:translate(2px, -50%); }
 }
 
-/* Countdown */
 #countdown{
   font-size:40px;
   margin-top:20px;
 }
 
-/* Scrolling text */
+/* Scroll warning */
 .scroll{
   position:absolute;
   bottom:0;
@@ -67,19 +67,19 @@ h1{
   color:black;
   font-weight:bold;
   padding:10px 0;
-  white-space:nowrap;
   overflow:hidden;
+  white-space:nowrap;
 }
 
 .scroll span{
   display:inline-block;
   padding-left:100%;
-  animation:scroll 10s linear infinite;
+  animation:scroll 12s linear infinite;
 }
 
 @keyframes scroll{
-  from{transform:translateX(0);}
-  to{transform:translateX(-100%);}
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-100%); }
 }
 
 /* Scanlines */
@@ -88,13 +88,15 @@ h1{
   inset:0;
   background:repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,0.05) 0px,
-    rgba(255,255,255,0.05) 2px,
+    rgba(255,255,255,0.04) 0px,
+    rgba(255,255,255,0.04) 2px,
     transparent 2px,
     transparent 4px
   );
   pointer-events:none;
 }
+
+/* Button */
 button{
   position:absolute;
   top:20px;
@@ -104,6 +106,7 @@ button{
   border:none;
   color:white;
   cursor:pointer;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -129,34 +132,43 @@ let time = 10;
 let interval;
 let audioContext;
 let oscillator;
+let sirenInterval;
 
 function startAlert(){
+
+  if(interval) return; // prevent multiple starts
 
   // Countdown
   interval = setInterval(()=>{
     time--;
     document.getElementById("countdown").innerText = time;
+
     if(time <= 0){
       clearInterval(interval);
       document.getElementById("countdown").innerText = "LOCKDOWN";
     }
   },1000);
 
-  // Siren Sound
+  // Siren (looping up/down frequency)
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
   oscillator = audioContext.createOscillator();
   let gainNode = audioContext.createGain();
 
   oscillator.type = "sawtooth";
-  oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 1);
-  oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 2);
-
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
   gainNode.gain.value = 0.2;
 
   oscillator.start();
+
+  let up = true;
+  sirenInterval = setInterval(()=>{
+    oscillator.frequency.setValueAtTime(
+      up ? 1000 : 600,
+      audioContext.currentTime
+    );
+    up = !up;
+  },600);
 }
 </script>
 
