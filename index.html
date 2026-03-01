@@ -1,121 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emergency Panel</title>
+<title>EMERGENCY ALERT</title>
 
 <style>
 body{
   margin:0;
-  background:#05070d;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  background:black;
+  color:white;
   font-family:Arial, sans-serif;
   overflow:hidden;
 }
 
-/* Background glow */
-body::before{
-  content:"";
-  position:absolute;
-  width:500px;
-  height:500px;
+/* Flashing background */
+.flash{
+  position:fixed;
+  inset:0;
   background:red;
-  filter:blur(150px);
-  opacity:0.15;
+  opacity:0;
+  animation:flash 1s infinite;
+  pointer-events:none;
 }
 
-/* Emergency Card */
-.panel{
-  position:relative;
-  width:320px;
-  height:200px;
-  background:linear-gradient(145deg,#1a0000,#2a0000);
-  border-radius:20px;
-  border:2px solid #ff1a1a;
-  box-shadow:
-    0 0 20px #ff0000,
-    0 0 60px rgba(255,0,0,0.6),
-    inset 0 0 30px rgba(255,0,0,0.4);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  animation:pulse 2s infinite;
+@keyframes flash{
+  0%{opacity:0;}
+  50%{opacity:0.4;}
+  100%{opacity:0;}
 }
 
-/* Glowing text */
-h1{
-  color:#ff4d4d;
-  letter-spacing:4px;
-  font-size:22px;
-  text-shadow:
-    0 0 10px red,
-    0 0 20px red,
-    0 0 40px darkred;
-}
-
-.icon{
-  font-size:40px;
-  color:#ff4d4d;
-  margin-bottom:10px;
-  text-shadow:0 0 20px red;
-}
-
-/* Pulse animation */
-@keyframes pulse{
-  0%{ box-shadow:0 0 20px red; }
-  50%{ box-shadow:0 0 50px red; }
-  100%{ box-shadow:0 0 20px red; }
-}
-
-/* Scanline effect */
-.scanlines{
+/* Center warning */
+.center{
   position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+}
+
+h1{
+  font-size:60px;
+  letter-spacing:8px;
+  color:#ff1a1a;
+  text-shadow:0 0 20px red, 0 0 40px red;
+  animation:glitch 0.3s infinite alternate;
+}
+
+@keyframes glitch{
+  from{transform:translate(-50%,-50%) skewX(0deg);}
+  to{transform:translate(-50%,-50%) skewX(2deg);}
+}
+
+/* Countdown */
+#countdown{
+  font-size:40px;
+  margin-top:20px;
+}
+
+/* Scrolling text */
+.scroll{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  background:red;
+  color:black;
+  font-weight:bold;
+  padding:10px 0;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+.scroll span{
+  display:inline-block;
+  padding-left:100%;
+  animation:scroll 10s linear infinite;
+}
+
+@keyframes scroll{
+  from{transform:translateX(0);}
+  to{transform:translateX(-100%);}
+}
+
+/* Scanlines */
+.scanlines{
+  position:fixed;
   inset:0;
   background:repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,0.03) 0px,
-    rgba(255,255,255,0.03) 2px,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 2px,
     transparent 2px,
     transparent 4px
   );
   pointer-events:none;
 }
-
-/* Button */
 button{
-  margin-top:15px;
-  padding:8px 20px;
-  background:#ff1a1a;
+  position:absolute;
+  top:20px;
+  right:20px;
+  padding:10px 20px;
+  background:red;
   border:none;
   color:white;
-  border-radius:8px;
   cursor:pointer;
-  box-shadow:0 0 10px red;
-}
-
-button:hover{
-  background:#cc0000;
 }
 </style>
 </head>
 
 <body>
 
-<div class="panel">
-  <div class="icon">⚠</div>
+<button onclick="startAlert()">START</button>
+
+<div class="flash"></div>
+<div class="scanlines"></div>
+
+<div class="center">
   <h1>EMERGENCY</h1>
-  <button onclick="activate()">ACTIVATE</button>
-  <div class="scanlines"></div>
+  <div id="countdown">10</div>
+</div>
+
+<div class="scroll">
+  <span>⚠ WARNING ⚠ EMERGENCY PROTOCOL ACTIVATED ⚠ SEEK IMMEDIATE SAFETY ⚠</span>
 </div>
 
 <script>
-function activate(){
-  alert("🚨 EMERGENCY PROTOCOL INITIATED 🚨");
+let time = 10;
+let interval;
+let audioContext;
+let oscillator;
+
+function startAlert(){
+
+  // Countdown
+  interval = setInterval(()=>{
+    time--;
+    document.getElementById("countdown").innerText = time;
+    if(time <= 0){
+      clearInterval(interval);
+      document.getElementById("countdown").innerText = "LOCKDOWN";
+    }
+  },1000);
+
+  // Siren Sound
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  oscillator = audioContext.createOscillator();
+  let gainNode = audioContext.createGain();
+
+  oscillator.type = "sawtooth";
+  oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 1);
+  oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 2);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  gainNode.gain.value = 0.2;
+
+  oscillator.start();
 }
 </script>
 
